@@ -10,6 +10,8 @@
 # TODO list --------------------------------------------------------------------
 #' - [x] read in data v3
 #' - [x] identify & report missing data
+#' - [x] switch from v3.0.1 to v3.1 data
+#' - [ ] save out how much of the global population is missing (in 2025 and each timestep, in % and totals?)
 #' - [ ] fill in missing data
 #'     - [ ] method: using v2 paths directly
 #'     - [ ] method: using v2 relationships (to another country or other countries)
@@ -32,10 +34,10 @@ source(here("R","utils.R"))
 
 # Versioning -------------------------------------------------------------------
 # Previous versions:
-# version.demands <- "..." # COMMENT e.g. on Tue 26/03/2024 18:57
+# version.demands <- "20240813_v1" # only shared with Bas on Teams, on 14.08.2024 only missing data analysis
 
 # Current version
-version.demands <- "20240813_v1" # newest version
+version.demands <- "20240814_v1" # newest version; updated to SSPv3.1
 
 output.folder <- here("output",version.demands)
 dir.create(output.folder)
@@ -49,7 +51,7 @@ dir.create(output.folder)
 
 ##### Public, original ---------------------------------------------------------
 sspv3 <- read_excel(
-  here("data", "1710759470883-ssp_basic_drivers_release_3.0.1_full-1.xlsx"),
+  here("data", "1721734326790-ssp_basic_drivers_release_3.1_full.xlsx"),
   sheet = "data"
 ) %>% iamc_wide_to_long(upper.to.lower = T) %>%
   mutate_cond(region=="Micronesia", region="Micronesia (Federated States of)") %>% # countrycode package doesn't recognise "Micronesia" by itself
@@ -97,7 +99,7 @@ sspv3.availability.allvariables <- sspv3 %>% #filter(variable %in% basic.variabl
 
 write_delim(
   x = sspv3.availability.allvariables,
-  file = file.path(output.folder, "country_availability_ALLVARIABLES_sspv301.csv"),
+  file = file.path(output.folder, "country_availability_ALLVARIABLES_sspv31.csv"),
   delim = ","
 )
 
@@ -115,7 +117,7 @@ sspv3.availability <- sspv3 %>% filter(variable %in% basic.variables) %>%
 
 write_delim(
   x = sspv3.availability,
-  file = file.path(output.folder, "country_availability_sspv301.csv"),
+  file = file.path(output.folder, "country_availability_sspv31.csv"),
   delim = ","
 )
 
@@ -127,13 +129,51 @@ sspv3.missing <- sspv3.availability %>% filter(
 )
 write_delim(
   x = sspv3.missing,
-  file = file.path(output.folder, "country_missing_sspv301.csv"),
+  file = file.path(output.folder, "country_missing_sspv31.csv"),
   delim = ","
 )
 
+##### missing GDP of countries, in terms of population -------------------------
+# tbd
 
-# Create amended SSPv3 ---------------------------------------------------------
-# TBD
+
+
+# Create amended SSPv3 (only GDP) ----------------------------------------------
+
+### Replace with (a) SSPv2 GDP PPP per capita (b) of own model, (c) multiplied by new population ----
+#' Notes & Issues:
+#' * Issues:
+#' - [ ] does not correct for the (important!) difference in units yet. Could perhaps be fixed using GDPuc? https://cran.r-project.org/web/packages/GDPuc/index.html
+#' - [ ] has no solution for countries not in v3 and also not in v2;
+#'          - for OECD, this is the case for four small island states, namely: CUW (Curacao), GLP (Guadeloupe), MTQ (Martinique), REU (Reunion)
+#'
+#' Notes:
+#' TODO:
+#' - [ ] For my current workflow, I'll then make two versions:
+#'          * OECDv3 -> OECDv2 (+unit conversion [WB data not available for SYR and VEN]) -> IIASAv3
+#'          * OECDv3 -> IIASAv3
+
+
+##### OECD ---------------------------------------------------------------------
+sspv3.oecd.missingcountries <- sspv3.missing %>% filter(is.na(`OECD ENV-Growth 2023|GDP|PPP`)) %>% pull(iso) %>% unique() %>% sort()
+# missing countries are: "AFG" (Afghanistan) "CUW" (Curacao) "GLP" (Guadeloupe) "MTQ" (Martinique) "PSE" (Palestine) "REU" (Reunion) "SYR" (Syria) "VEN" (Venezuela)
+sspv3.oecd <- sspv3 %>% filter(model=="OECD ENV-Growth 2023",
+                               scenario!="Historical Reference")
+sspv2.oecd.forv3 <- sspv2 %>% filter(region%in%sspv3.oecd.missingcountries,
+                                     model=="OECD Env-Growth")
+print(paste0((sspv2.oecd.forv3 %>% region_unique() %>% length()), " out of ", length(sspv3.oecd.missingcountries), " countries can be filled with SSPv2 data"))
+
+install.packages("GDPuc")
+library(GDPuc)
+sspv2.oecd.forv3.withv3unit <- sspv2.oecd.forv3 %>% rename(iso3c=region) %>%
+  convertGDP(unit_in = "constant 2005 Int$PPP", unit_out = "constant 2017 Int$PPP")
+
+
+##### IIASA
+# not yet implemented.
+
+
+
 
 
 
