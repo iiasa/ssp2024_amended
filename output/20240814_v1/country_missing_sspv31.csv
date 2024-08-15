@@ -55,8 +55,6 @@ Historical Reference,CAF,Central African Republic,NA,yes,yes
 Historical Reference,TCD,Chad,NA,yes,yes
 Historical Reference,CHL,Chile,NA,yes,yes
 Historical Reference,CHN,China,NA,yes,yes
-Historical Reference,CHN,China (R9),NA,yes,yes
-Historical Reference,CHN,China+ (R10),NA,yes,yes
 Historical Reference,COL,Colombia,NA,yes,yes
 Historical Reference,COM,Comoros,NA,yes,yes
 Historical Reference,COG,Congo,NA,yes,yes
@@ -103,8 +101,6 @@ Historical Reference,HKG,Hong Kong,NA,yes,yes
 Historical Reference,HUN,Hungary,NA,yes,yes
 Historical Reference,ISL,Iceland,NA,yes,yes
 Historical Reference,IND,India,NA,yes,yes
-Historical Reference,IND,India (R9),NA,yes,yes
-Historical Reference,IND,India+ (R10),NA,yes,yes
 Historical Reference,IDN,Indonesia,NA,yes,yes
 Historical Reference,IRN,Iran,NA,yes,yes
 Historical Reference,IRQ,Iraq,NA,yes,yes
@@ -208,7 +204,6 @@ Historical Reference,TTO,Trinidad and Tobago,NA,yes,yes
 Historical Reference,TUN,Tunisia,NA,yes,yes
 Historical Reference,TUR,Turkey,NA,yes,yes
 Historical Reference,TKM,Turkmenistan,NA,yes,yes
-Historical Reference,USA,USA (R9),NA,yes,yes
 Historical Reference,UGA,Uganda,NA,yes,yes
 Historical Reference,UKR,Ukraine,NA,yes,yes
 Historical Reference,ARE,United Arab Emirates,NA,yes,yes
