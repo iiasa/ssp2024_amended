@@ -3437,7 +3437,7 @@ load_official_country_grouping <- function(grouping.to.load,
     stop("Please specify a grouping to load.")
   } else if (is.na(grouping.to.load) & keep.long.names) {
     grp <- vroom(
-        here("data-raw", "countrygroupings_2024_01.csv"), show_col_types=FALSE
+        here("data", "countrygroupings_2024_01.csv"), show_col_types=FALSE
       ) %>%
       rename(iso = ISO) %>%
       select(
@@ -3446,12 +3446,12 @@ load_official_country_grouping <- function(grouping.to.load,
       )
   } else {
     grp <- vroom(
-      here("data-raw", "countrygroupings_2024_01.csv"), show_col_types=FALSE
+      here("data", "countrygroupings_2024_01.csv"), show_col_types=FALSE
     ) %>%
       rename(iso = ISO) %>%
       left_join(
         vroom(
-          here("data-raw", "iso3c_region_mapping.csv"), show_col_types=FALSE
+          here("data", "iso3c_region_mapping.csv"), show_col_types=FALSE
         ) %>%
           rename(iso = iso3c) %>%
           select(
@@ -3493,6 +3493,50 @@ load_long_names_of_iso3c <- function(){
 
 
 ### Visualisation utils --------------------------------------------------------
+
+##### Plotting style -----------------------------------------------------------
+#' Apply Jarmo's custom plotting style
+#'
+#' @param
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' # example ggplot
+#' ggplot(s %>% filter(variable=="Primary Energy|Gas")),
+#'     aes(x=year,y=value,colour=variable,linetype=scenario,group=interaction(model,scenario,region,variable))) +
+#'     facet_wrap(~region, scales = "free_y") +
+#'     geom_line() +
+#'     theme_jsk() +
+#'     ylab("Primary Energy Gas")
+theme_jsk <- function() {
+
+  theme_classic() + theme_hc() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      axis.title.x = element_blank()
+    )
+
+}
+
+#' Apply background colour to historical values (in a timeseries plot)
+#'
+#' @param
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' # example ggplot
+#' ggplot(s %>% filter(variable=="Primary Energy|Gas")),
+#'     aes(x=year,y=value,colour=variable,linetype=scenario,group=interaction(model,scenario,region,variable))) +
+#'     facet_wrap(~region, scales = "free_y") +
+#'     mark_history() +
+#'     geom_line()
+mark_history <- function(sy=STARTYEAR){
+  annotate("rect", xmin=-Inf, xmax=sy, ymin=-Inf, ymax=Inf, alpha=0.2, fill="lightgrey", colour=NA)
+}
 
 ##### Adjusting plots ----------------------------------------------------------
 #' Desaturate colors by specified proportion

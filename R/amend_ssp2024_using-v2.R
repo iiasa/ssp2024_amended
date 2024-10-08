@@ -17,7 +17,8 @@
 #'     - [x] method: using v3 IIASA trajectories
 #'     - [ ] method: using v2 relationships (to another country or other countries)
 #'            - [ ] explore performance using SSP v2?
-#'     - [ ] method: tbd.
+#'     - [ ] method: R10 share in iiasa projections of each country, and apply that to OECD
+#'     - [ ] method: R10 share in OECD SSPv2 projections
 #'
 
 # Load libraries ---------------------------------------------------------------
@@ -26,6 +27,7 @@ library("tidyverse")
 library("vroom")
 library("readxl")
 library("countrycode")
+library("ggthemes")
 # install.packages("GDPuc")
 library(GDPuc)
 
@@ -37,9 +39,10 @@ source(here("R","utils.R"))
 # Versioning -------------------------------------------------------------------
 # Previous versions:
 # version.demands <- "20240813_v1" # only shared with Bas on Teams, on 14.08.2024 only missing data analysis
+# version.demands <- "20240814_v1" # newest version; updated to SSPv3.1
 
 # Current version
-version.demands <- "20240814_v1" # newest version; updated to SSPv3.1
+version.demands <- "20241008_v2" # add R10 shares methods
 
 output.folder <- here("output",version.demands)
 dir.create(output.folder)
@@ -61,7 +64,7 @@ year.columns <- c("1950", "1955", "1960", "1965", "1970", "1975", "1980", "1985"
 sspv3 <- read_excel(
   here("data", "1721734326790-ssp_basic_drivers_release_3.1_full.xlsx"),
   sheet = "data",
-  col_types = c(rep("text", 5), rep("numeric", length(year_columns)))
+  col_types = c(rep("text", 5), rep("numeric", length(year.columns)))
 ) %>% iamc_wide_to_long(upper.to.lower = T) %>%
   filter(
     !grepl(region, pattern="(R5)", fixed=T),
@@ -73,15 +76,6 @@ sspv3 <- read_excel(
   mutate(iso=countrycode(region, origin = "country.name", destination = "iso3c")) %>%
   drop_na(iso)
 sspv3.population.marker <- sspv3 %>% filter(variable=="Population")
-
-##### Oliver, MESSAGE-internal -------------------------------------------------
-# from: https://iiasahub.sharepoint.com/:x:/r/sites/eceprog/Shared%20Documents/SharedSocioEconomicPathways2023/WP%20-%20Drivers/SSP_drivers_v3/SSP_drivers_v3_2024-04-12.csv?d=w04381c54fe6e48059c0687e1522d596c&csf=1&web=1&e=D4DGTh
-# - has multiple different USD units
-sspv3_oliver <- vroom(
-  here("data", "SSP_drivers_v3_2024-04-12(in).csv")
-) %>% rename(scenario=SSP, region=ISO, variable=Variable, unit=Unit) %>% mutate(model="Marker model") %>% select(all_of(c("model","scenario","region","variable","unit")),
-                                                                                                                 everything()) %>%
-  iamc_wide_to_long()
 
 
 ### SSPv2 (original) data ------------------------------------------------------
@@ -97,6 +91,11 @@ sspv2.GDPpc.marker <- sspv2.GDP.marker %>% left_join(sspv2.population.marker %>%
     value = value*1e9/(population.million*1e6)
   ) %>% select(-population.million)
 sspv2.GDP.GDPpc.marker <- sspv2.GDP.marker %>% bind_rows(sspv2.GDPpc.marker)
+
+
+### R10 grouping -----------------------------------------------------------------
+r10 <- load_official_country_grouping(grouping.to.load = "region_ar6_10_ipcc_fgd") %>%  # note: could check consistency with https://github.com/IAMconsortium/common-definitions/blob/main/definitions/region/common.yaml
+  rename(region_r10=region_ar6_10_ipcc_fgd)
 
 
 # Check missing countries in SSPv3 (specific versions/variables) ---------------
@@ -162,23 +161,10 @@ write_delim(
 
 
 
-# Create amended SSPv3 (only GDP) ----------------------------------------------
+# Create amended SSPv3 (fill missing countries in OECD GDP) --------------------
 
-### Replace with (a) SSPv2 GDP PPP per capita (b) of own model, (c) multiplied by new population ----
-#' Notes & Issues:
-#' * Issues:
-#' - [ ] does not correct for the (important!) difference in units yet. Could perhaps be fixed using GDPuc? https://cran.r-project.org/web/packages/GDPuc/index.html
-#' - [ ] has no solution for countries not in v3 and also not in v2;
-#'          - for OECD, this is the case for four small island states, namely: CUW (Curacao), GLP (Guadeloupe), MTQ (Martinique), REU (Reunion)
-#'
-#' Notes:
-#' TODO:
-#' - [ ] For my current workflow, I'll then make two versions:
-#'          * OECDv3 -> OECDv2 (+unit conversion [WB data not available for SYR and VEN]) -> IIASAv3
-#'          * OECDv3 -> IIASAv3
+### What percentage of the world population is missing? ------------------------
 
-
-##### OECD ---------------------------------------------------------------------
 sspv3.oecd.missingcountries <- sspv3.missing %>% filter(is.na(`OECD ENV-Growth 2023|GDP|PPP`)) %>% pull(iso) %>% unique() %>% sort()
 # missing countries are: "AFG" (Afghanistan) "CUW" (Curacao) "GLP" (Guadeloupe) "MTQ" (Martinique) "PSE" (Palestine) "REU" (Reunion) "SYR" (Syria) "VEN" (Venezuela)
 sspv3.oecd <- sspv3 %>% filter(model=="OECD ENV-Growth 2023",
@@ -200,6 +186,8 @@ save_ggplot(
   p = p.missing.percentage,
   f = file.path(output.folder, "OECD_SSPv3_GDPmissing_populationshare")
 )
+
+### Filling in based on SSPv2-OECD only (using unit conversions) ---------------
 
 # sspv2 OECD -- obtain missing countries and bring into the same unit and format
 sspv2.oecd.forv3 <- sspv2.GDP.GDPpc.marker %>% filter(region%in%sspv3.oecd.missingcountries)
@@ -227,6 +215,8 @@ cat(paste0(
   " countries can be filled with SSPv2 data.\n    Countries: ",
   paste(sspv2.oecd.forv3.withv3unit.sameformat %>% pull(region.name) %>% unique(), collapse = ", ")
 ))
+
+### Filling in based on SSPv3-IIASA only ---------------------------------------
 
 # sspv3 IIASA -- obtain missing countries and bring into the same unit and format
 sspv3.iiasa.forv3 <- sspv3 %>% filter(iso%in%sspv3.oecd.missingcountries,
@@ -257,82 +247,228 @@ sspv3.iiasa.forv3.percapita <- sspv3.iiasa.forv3 %>% left_join(
 sspv3.iiasa.forv3.GDP.GDPpc <- sspv3.iiasa.forv3 %>% bind_rows(sspv3.iiasa.forv3.percapita)
 
 
+### Filling in: R10 shares IIASA -----------------------------------------------
+##### calculate shares in R10 of IIASAv3 ---------------------------------------
+gdp.iiasav3 <- sspv3 %>% filter(model=="IIASA GDP 2023") %>% drop_na()
+r10.gdp.iiasav3 <- gdp.iiasav3 %>%
+  left_join(r10) %>%
+  reframe(
+    value_r10 = sum(value),
+    .by = c("model", "scenario", "region_r10", "variable", "unit", "year")
+  )
+share.of.r10.each.missing.country.iiasav3 <- gdp.iiasav3 %>%
+  left_join(r10) %>%
+  left_join(r10.gdp.iiasav3) %>%
+  mutate(country.missing = ifelse(iso%in%sspv3.oecd.missingcountries,
+                                  "yes",
+                                  "no")) %>%
+  mutate(share_r10 = value/value_r10) %>%
+  filter(country.missing == "yes") %>%
+  select(-value,
+         -value_r10,
+         -model) # don't use iiasa value directly
+
+##### calculate R10 OECDv3 (which misses few countries) ------------------------
+gdp.oecdv3 <- sspv3 %>% filter(model=="OECD ENV-Growth 2023") %>% drop_na()
+r10.gdp.oecdv3 <- gdp.oecdv3 %>%
+  left_join(r10) %>%
+  reframe(
+    value_r10 = sum(value),
+    .by = c("model", "scenario", "region_r10", "variable", "unit", "year")
+  )
+
+##### calculate OECDv3 values based on IIASA R10 shares ------------------------
+sspv3.iiasar10shares.forv3 <- share.of.r10.each.missing.country.iiasav3 %>%
+  left_join(r10.gdp.oecdv3) %>%
+  mutate(
+    value = (value_r10/(1-share_r10))-value_r10
+  ) %>%
+  select(model,scenario,region,variable,unit,year,iso,value)
+
+##### add/calculate GDP per capita ---------------------------------------------
+sspv3.iiasar10shares.forv3.percapita <- sspv3.iiasar10shares.forv3 %>% left_join(
+  sspv3.population.marker %>% select(scenario,iso,year,value) %>% rename(population.million = value)
+) %>%
+  mutate(
+    variable="GDP|PPP [per capita]",
+    unit = "USD_2017/yr",
+    value = value*1e9/(population.million*1e6)
+  ) %>% select(-population.million)
+
+sspv3.iiasar10shares.forv3.percapita.GDP.GDPpc <- sspv3.iiasar10shares.forv3 %>% bind_rows(sspv3.iiasar10shares.forv3.percapita)
+
+
+### Filling in: R10 shares OECD SSPv2 ------------------------------------------
+##### calculate shares in R10 of OECDv2 ---------------------------------------
+gdp.oecdv2 <- sspv2 %>% filter(model=="OECD Env-Growth") %>% drop_na() %>%
+  rename(iso=region) %>%
+  mutate_cond(grepl(scenario, pattern = "SSP1", fixed=T), scenario="SSP1") %>%
+  mutate_cond(grepl(scenario, pattern = "SSP2", fixed=T), scenario="SSP2") %>%
+  mutate_cond(grepl(scenario, pattern = "SSP3", fixed=T), scenario="SSP3") %>%
+  mutate_cond(grepl(scenario, pattern = "SSP4", fixed=T), scenario="SSP4") %>%
+  mutate_cond(grepl(scenario, pattern = "SSP5", fixed=T), scenario="SSP5")
+r10.gdp.oecdv2 <- gdp.oecdv2 %>%
+  left_join(r10) %>%
+  reframe(
+    value_r10 = sum(value),
+    .by = c("model", "scenario", "region_r10", "variable", "unit", "year")
+  )
+share.of.r10.each.missing.country.oecdv2 <- gdp.oecdv2 %>%
+  left_join(r10) %>%
+  left_join(r10.gdp.oecdv2) %>%
+  mutate(country.missing = ifelse(iso%in%sspv3.oecd.missingcountries,
+                                  "yes",
+                                  "no")) %>%
+  mutate(share_r10 = value/value_r10) %>%
+  filter(country.missing == "yes") %>%
+  select(-value,
+         -value_r10,
+         -unit,
+         -model) # don't use oecd SSPv2 value directly
+
+##### calculate R10 OECDv3 (which misses few countries) ------------------------
+gdp.oecdv3 <- sspv3 %>% filter(model=="OECD ENV-Growth 2023") %>% drop_na()
+r10.gdp.oecdv3 <- gdp.oecdv3 %>%
+  left_join(r10) %>%
+  reframe(
+    value_r10 = sum(value),
+    .by = c("model", "scenario", "region_r10", "variable", "unit", "year")
+  )
+
+##### calculate OECDv3 values based on IIASA R10 shares ------------------------
+sspv2.oecdr10shares.forv3 <- share.of.r10.each.missing.country.oecdv2 %>%
+  left_join(r10.gdp.oecdv3) %>%
+  mutate(
+    value = (value_r10/(1-share_r10))-value_r10
+  ) %>%
+  mutate(region=countrycode(iso, origin = "iso3c", destination = "country.name")) %>%
+  select(model,scenario,region,variable,unit,year,iso,value) %>%
+  drop_na() # e.g. value 2015 and earlier will be NA
+
+##### add/calculate GDP per capita ---------------------------------------------
+sspv2.oecdr10shares.forv3.percapita <- sspv2.oecdr10shares.forv3 %>% left_join(
+  sspv3.population.marker %>% select(scenario,iso,year,value) %>% rename(population.million = value)
+) %>%
+  mutate(
+    variable="GDP|PPP [per capita]",
+    unit = "USD_2017/yr",
+    value = value*1e9/(population.million*1e6)
+  ) %>% select(-population.million)
+
+sspv2.oecdr10shares.forv3.percapita.GDP.GDPpc <- sspv2.oecdr10shares.forv3 %>% bind_rows(sspv2.oecdr10shares.forv3.percapita)
+
+
+
+
+
+### COMBINE versions -----------------------------------------------------------
+
 ## all relevant data: bind_rows, pivot
-sspv3.future.marker.data <- sspv3.oecd %>%
-  bind_rows(sspv2.oecd.forv3.withv3unit.sameformat) %>%
-  bind_rows(sspv3.iiasa.forv3.GDP.GDPpc) %>%
-  select(model,scenario,iso,variable,unit,year,value) %>%
-  pivot_wider(names_from = model, values_from = value, values_fill = NA_real_)
+sspv3.future.marker.data.long <- sspv3.oecd %>% mutate(data.version="OECD") %>%
+  bind_rows(sspv2.oecd.forv3.withv3unit.sameformat %>% mutate(data.version="OECD old (unit conversion)")) %>%
+  bind_rows(sspv3.iiasa.forv3.GDP.GDPpc %>% mutate(data.version="IIASA")) %>%
+  bind_rows(sspv2.oecdr10shares.forv3.percapita.GDP.GDPpc %>% mutate(data.version="Using old OECD R10 shares")) %>%
+  bind_rows(sspv3.iiasar10shares.forv3.percapita.GDP.GDPpc %>% mutate(data.version="Using IIASA R10 shares")) %>%
+  select(-model,-region.name,
+         scenario,iso,variable,unit,year,value,data.version)
+sspv3.future.marker.data <- sspv3.future.marker.data.long %>%
+  pivot_wider(names_from = data.version, values_from = value, values_fill = NA_real_)
 
 
-## OECD versions first
-sspv3.amended.oecdfirst <- sspv3.future.marker.data %>%
-  mutate(value=`OECD ENV-Growth 2023`) %>% # first choice marker
-  mutate_cond((
-    (
-    is.na(value)|value==0
-    )&(
-    !((is.na(`OECD Env-Growth`))|(`OECD Env-Growth`==0))
-    )
-  ),
-              value = `OECD Env-Growth`) %>% # add OECD SSPv2
-  mutate_cond((
-    (
-      is.na(value)|value==0
-    )&(
-      !((is.na(`IIASA GDP 2023`))|(`IIASA GDP 2023`==0))
-    )
-  ),
-              value = `IIASA GDP 2023`) %>%  # add IIASA SSPv3
-  # reformat
-  mutate(model = "GDP marker (amended)") %>%
-  select(model,scenario,iso,variable,unit,year,value) %>%
-  rename(Model = model, Scenario = scenario, Region = iso, Variable = variable, Unit = unit) %>%
-  pivot_wider(values_from = value, names_from = year)
 
+##### visualise ----------------------------------------------------------------
+
+p.gdp <- ggplot(
+  sspv3.future.marker.data.long %>% filter(iso%in%sspv3.oecd.missingcountries) %>%
+    filter(variable=="GDP|PPP [per capita]") %>%
+    filter(data.version!="OECD old (unit conversion)"),
+  aes(x=year,y=value,
+      colour=scenario,
+      # linetype=data.version,
+      group=interaction(scenario,iso,data.version))
+) +
+  facet_grid(data.version~iso) +
+  geom_line(linewidth=1.3) +
+  ylab("USD_2017/yr") + xlab(NULL) +
+  labs(title = "GDP|PPP [per capita]",
+       subtitle = "Different infilling options") +
+  theme_jsk() +
+  scale_color_ptol() +
+  mark_history(sy=2025)
+
+p.gdp
+
+save_ggplot(
+  p = p.gdp,
+  f = file.path(output.folder, "gdp_sspv31_infillingoptions"),
+  w = 300,
+  h = 200
+)
+
+##### save long data -----------------------------------------------------------
 write_delim(
-  x = sspv3.amended.oecdfirst,
-  file = file.path(output.folder, "gdp_sspv31_markeramended_oecdfirst.csv"),
+  x = sspv3.future.marker.data.long,
+  file = file.path(output.folder, "gdp_sspv31_withallextradata.csv"),
   delim = ","
 )
 
 
-## v3 version first
-sspv3.amended.v3only <- sspv3.future.marker.data %>%
-  mutate(value=`OECD ENV-Growth 2023`) %>% # first choice marker
-  mutate_cond((
-    (
-      is.na(value)|value==0
-    )&(
-      !((is.na(`IIASA GDP 2023`))|(`IIASA GDP 2023`==0))
-    )
-  ),
-  value = `IIASA GDP 2023`) %>%  # add IIASA SSPv3
-  # reformat
-  mutate(model = "GDP marker (amended)") %>%
-  select(model,scenario,iso,variable,unit,year,value) %>%
-  rename(Model = model, Scenario = scenario, Region = iso, Variable = variable, Unit = unit) %>%
-  pivot_wider(values_from = value, names_from = year)
-
-
-write_delim(
-  x = sspv3.amended.v3only,
-  file = file.path(output.folder, "gdp_sspv31_markeramended_v3only.csv"),
-  delim = ","
-)
-
-
-##### IIASA
-# not yet implemented.
-
-
-
-
-
-
-
-
-
+# ### SELECT and SAVE priorities -------------------------------------------------
+# ## OECD versions first
+# sspv3.amended.oecdfirst <- sspv3.future.marker.data %>%
+#   mutate(value=`OECD ENV-Growth 2023`) %>% # first choice marker
+#   mutate_cond((
+#     (
+#     is.na(value)|value==0
+#     )&(
+#     !((is.na(`OECD Env-Growth`))|(`OECD Env-Growth`==0))
+#     )
+#   ),
+#               value = `OECD Env-Growth`) %>% # add OECD SSPv2
+#   mutate_cond((
+#     (
+#       is.na(value)|value==0
+#     )&(
+#       !((is.na(`IIASA GDP 2023`))|(`IIASA GDP 2023`==0))
+#     )
+#   ),
+#               value = `IIASA GDP 2023`) %>%  # add IIASA SSPv3
+#   # reformat
+#   mutate(model = "GDP marker (amended)") %>%
+#   select(model,scenario,iso,variable,unit,year,value) %>%
+#   rename(Model = model, Scenario = scenario, Region = iso, Variable = variable, Unit = unit) %>%
+#   pivot_wider(values_from = value, names_from = year)
+#
+# write_delim(
+#   x = sspv3.amended.oecdfirst,
+#   file = file.path(output.folder, "gdp_sspv31_markeramended_oecdfirst.csv"),
+#   delim = ","
+# )
+#
+#
+# ## v3 version first
+# sspv3.amended.v3only <- sspv3.future.marker.data %>%
+#   mutate(value=`OECD ENV-Growth 2023`) %>% # first choice marker
+#   mutate_cond((
+#     (
+#       is.na(value)|value==0
+#     )&(
+#       !((is.na(`IIASA GDP 2023`))|(`IIASA GDP 2023`==0))
+#     )
+#   ),
+#   value = `IIASA GDP 2023`) %>%  # add IIASA SSPv3
+#   # reformat
+#   mutate(model = "GDP marker (amended)") %>%
+#   select(model,scenario,iso,variable,unit,year,value) %>%
+#   rename(Model = model, Scenario = scenario, Region = iso, Variable = variable, Unit = unit) %>%
+#   pivot_wider(values_from = value, names_from = year)
+#
+#
+# write_delim(
+#   x = sspv3.amended.v3only,
+#   file = file.path(output.folder, "gdp_sspv31_markeramended_v3only.csv"),
+#   delim = ","
+# )
 
 
 

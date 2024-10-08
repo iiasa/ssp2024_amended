@@ -1,0 +1,291 @@
+scenario,iso,region,IIASA GDP 2023|GDP|PPP,IIASA-WiC POP 2023|Population,OECD ENV-Growth 2023|GDP|PPP
+SSP1,AFG,Afghanistan,yes,yes,NA
+SSP1,PSE,Palestine,yes,yes,NA
+SSP1,SYR,Syria,yes,yes,NA
+SSP1,VEN,Venezuela,yes,yes,NA
+SSP2,AFG,Afghanistan,yes,yes,NA
+SSP2,PSE,Palestine,yes,yes,NA
+SSP2,SYR,Syria,yes,yes,NA
+SSP2,VEN,Venezuela,yes,yes,NA
+SSP3,AFG,Afghanistan,yes,yes,NA
+SSP3,PSE,Palestine,yes,yes,NA
+SSP3,SYR,Syria,yes,yes,NA
+SSP3,VEN,Venezuela,yes,yes,NA
+SSP4,AFG,Afghanistan,yes,yes,NA
+SSP4,PSE,Palestine,yes,yes,NA
+SSP4,SYR,Syria,yes,yes,NA
+SSP4,VEN,Venezuela,yes,yes,NA
+SSP5,AFG,Afghanistan,yes,yes,NA
+SSP5,PSE,Palestine,yes,yes,NA
+SSP5,SYR,Syria,yes,yes,NA
+SSP5,VEN,Venezuela,yes,yes,NA
+Historical Reference,AFG,Afghanistan,NA,yes,NA
+Historical Reference,ALB,Albania,NA,yes,yes
+Historical Reference,DZA,Algeria,NA,yes,yes
+Historical Reference,AGO,Angola,NA,yes,yes
+Historical Reference,ATG,Antigua and Barbuda,NA,yes,yes
+Historical Reference,ARG,Argentina,NA,yes,yes
+Historical Reference,ARM,Armenia,NA,yes,yes
+Historical Reference,ABW,Aruba,NA,yes,yes
+Historical Reference,AUS,Australia,NA,yes,yes
+Historical Reference,AUT,Austria,NA,yes,yes
+Historical Reference,AZE,Azerbaijan,NA,yes,yes
+Historical Reference,BHS,Bahamas,NA,yes,yes
+Historical Reference,BHR,Bahrain,NA,yes,yes
+Historical Reference,BGD,Bangladesh,NA,yes,yes
+Historical Reference,BRB,Barbados,NA,yes,yes
+Historical Reference,BLR,Belarus,NA,yes,yes
+Historical Reference,BEL,Belgium,NA,yes,yes
+Historical Reference,BLZ,Belize,NA,yes,yes
+Historical Reference,BEN,Benin,NA,yes,yes
+Historical Reference,BTN,Bhutan,NA,yes,yes
+Historical Reference,BOL,Bolivia,NA,yes,yes
+Historical Reference,BIH,Bosnia and Herzegovina,NA,yes,yes
+Historical Reference,BWA,Botswana,NA,yes,yes
+Historical Reference,BRA,Brazil,NA,yes,yes
+Historical Reference,BRN,Brunei Darussalam,NA,yes,yes
+Historical Reference,BGR,Bulgaria,NA,yes,yes
+Historical Reference,BFA,Burkina Faso,NA,yes,yes
+Historical Reference,BDI,Burundi,NA,yes,yes
+Historical Reference,CPV,Cabo Verde,NA,yes,yes
+Historical Reference,KHM,Cambodia,NA,yes,yes
+Historical Reference,CMR,Cameroon,NA,yes,yes
+Historical Reference,CAN,Canada,NA,yes,yes
+Historical Reference,CAF,Central African Republic,NA,yes,yes
+Historical Reference,TCD,Chad,NA,yes,yes
+Historical Reference,CHL,Chile,NA,yes,yes
+Historical Reference,CHN,China,NA,yes,yes
+Historical Reference,COL,Colombia,NA,yes,yes
+Historical Reference,COM,Comoros,NA,yes,yes
+Historical Reference,COG,Congo,NA,yes,yes
+Historical Reference,CRI,Costa Rica,NA,yes,yes
+Historical Reference,HRV,Croatia,NA,yes,yes
+Historical Reference,CUB,Cuba,NA,yes,yes
+Historical Reference,CUW,Curaçao,NA,yes,NA
+Historical Reference,CYP,Cyprus,NA,yes,yes
+Historical Reference,CZE,Czechia,NA,yes,yes
+Historical Reference,CIV,Côte d'Ivoire,NA,yes,yes
+Historical Reference,COD,Democratic Republic of the Congo,NA,yes,yes
+Historical Reference,DNK,Denmark,NA,yes,yes
+Historical Reference,DJI,Djibouti,NA,yes,yes
+Historical Reference,DOM,Dominican Republic,NA,yes,yes
+Historical Reference,ECU,Ecuador,NA,yes,yes
+Historical Reference,EGY,Egypt,NA,yes,yes
+Historical Reference,SLV,El Salvador,NA,yes,yes
+Historical Reference,GNQ,Equatorial Guinea,NA,yes,yes
+Historical Reference,ERI,Eritrea,NA,yes,yes
+Historical Reference,EST,Estonia,NA,yes,yes
+Historical Reference,SWZ,Eswatini,NA,yes,yes
+Historical Reference,ETH,Ethiopia,NA,yes,yes
+Historical Reference,FJI,Fiji,NA,yes,yes
+Historical Reference,FIN,Finland,NA,yes,yes
+Historical Reference,FRA,France,NA,yes,yes
+Historical Reference,GUF,French Guiana,NA,yes,yes
+Historical Reference,PYF,French Polynesia,NA,yes,yes
+Historical Reference,GAB,Gabon,NA,yes,yes
+Historical Reference,GMB,Gambia,NA,yes,yes
+Historical Reference,GEO,Georgia,NA,yes,yes
+Historical Reference,DEU,Germany,NA,yes,yes
+Historical Reference,GHA,Ghana,NA,yes,yes
+Historical Reference,GRC,Greece,NA,yes,yes
+Historical Reference,GRD,Grenada,NA,yes,yes
+Historical Reference,GLP,Guadeloupe,NA,yes,NA
+Historical Reference,GUM,Guam,NA,yes,yes
+Historical Reference,GTM,Guatemala,NA,yes,yes
+Historical Reference,GIN,Guinea,NA,yes,yes
+Historical Reference,GNB,Guinea-Bissau,NA,yes,yes
+Historical Reference,GUY,Guyana,NA,yes,yes
+Historical Reference,HTI,Haiti,NA,yes,yes
+Historical Reference,HND,Honduras,NA,yes,yes
+Historical Reference,HKG,Hong Kong,NA,yes,yes
+Historical Reference,HUN,Hungary,NA,yes,yes
+Historical Reference,ISL,Iceland,NA,yes,yes
+Historical Reference,IND,India,NA,yes,yes
+Historical Reference,IDN,Indonesia,NA,yes,yes
+Historical Reference,IRN,Iran,NA,yes,yes
+Historical Reference,IRQ,Iraq,NA,yes,yes
+Historical Reference,IRL,Ireland,NA,yes,yes
+Historical Reference,ISR,Israel,NA,yes,yes
+Historical Reference,ITA,Italy,NA,yes,yes
+Historical Reference,JAM,Jamaica,NA,yes,yes
+Historical Reference,JPN,Japan,NA,yes,yes
+Historical Reference,JOR,Jordan,NA,yes,yes
+Historical Reference,KAZ,Kazakhstan,NA,yes,yes
+Historical Reference,KEN,Kenya,NA,yes,yes
+Historical Reference,KIR,Kiribati,NA,yes,yes
+Historical Reference,KWT,Kuwait,NA,yes,yes
+Historical Reference,KGZ,Kyrgyzstan,NA,yes,yes
+Historical Reference,LAO,Laos,NA,yes,yes
+Historical Reference,LVA,Latvia,NA,yes,yes
+Historical Reference,LBN,Lebanon,NA,yes,yes
+Historical Reference,LSO,Lesotho,NA,yes,yes
+Historical Reference,LBR,Liberia,NA,yes,yes
+Historical Reference,LBY,Libya,NA,yes,yes
+Historical Reference,LTU,Lithuania,NA,yes,yes
+Historical Reference,LUX,Luxembourg,NA,yes,yes
+Historical Reference,MAC,Macao,NA,yes,yes
+Historical Reference,MDG,Madagascar,NA,yes,yes
+Historical Reference,MWI,Malawi,NA,yes,yes
+Historical Reference,MYS,Malaysia,NA,yes,yes
+Historical Reference,MDV,Maldives,NA,yes,yes
+Historical Reference,MLI,Mali,NA,yes,yes
+Historical Reference,MLT,Malta,NA,yes,yes
+Historical Reference,MTQ,Martinique,NA,yes,NA
+Historical Reference,MRT,Mauritania,NA,yes,yes
+Historical Reference,MUS,Mauritius,NA,yes,yes
+Historical Reference,MYT,Mayotte,NA,yes,yes
+Historical Reference,MEX,Mexico,NA,yes,yes
+Historical Reference,FSM,Micronesia (Federated States of),NA,yes,yes
+Historical Reference,MDA,Moldova,NA,yes,yes
+Historical Reference,MNG,Mongolia,NA,yes,yes
+Historical Reference,MNE,Montenegro,NA,yes,yes
+Historical Reference,MAR,Morocco,NA,yes,yes
+Historical Reference,MOZ,Mozambique,NA,yes,yes
+Historical Reference,MMR,Myanmar,NA,yes,yes
+Historical Reference,NAM,Namibia,NA,yes,yes
+Historical Reference,NPL,Nepal,NA,yes,yes
+Historical Reference,NLD,Netherlands,NA,yes,yes
+Historical Reference,NCL,New Caledonia,NA,yes,yes
+Historical Reference,NZL,New Zealand,NA,yes,yes
+Historical Reference,NIC,Nicaragua,NA,yes,yes
+Historical Reference,NER,Niger,NA,yes,yes
+Historical Reference,NGA,Nigeria,NA,yes,yes
+Historical Reference,PRK,North Korea,NA,yes,yes
+Historical Reference,MKD,North Macedonia,NA,yes,yes
+Historical Reference,NOR,Norway,NA,yes,yes
+Historical Reference,OMN,Oman,NA,yes,yes
+Historical Reference,PAK,Pakistan,NA,yes,yes
+Historical Reference,PSE,Palestine,NA,yes,NA
+Historical Reference,PAN,Panama,NA,yes,yes
+Historical Reference,PNG,Papua New Guinea,NA,yes,yes
+Historical Reference,PRY,Paraguay,NA,yes,yes
+Historical Reference,PER,Peru,NA,yes,yes
+Historical Reference,PHL,Philippines,NA,yes,yes
+Historical Reference,POL,Poland,NA,yes,yes
+Historical Reference,PRT,Portugal,NA,yes,yes
+Historical Reference,PRI,Puerto Rico,NA,yes,yes
+Historical Reference,QAT,Qatar,NA,yes,yes
+Historical Reference,ROU,Romania,NA,yes,yes
+Historical Reference,RUS,Russian Federation,NA,yes,yes
+Historical Reference,RWA,Rwanda,NA,yes,yes
+Historical Reference,REU,Réunion,NA,yes,NA
+Historical Reference,LCA,Saint Lucia,NA,yes,yes
+Historical Reference,VCT,Saint Vincent and the Grenadines,NA,yes,yes
+Historical Reference,WSM,Samoa,NA,yes,yes
+Historical Reference,STP,Sao Tome and Principe,NA,yes,yes
+Historical Reference,SAU,Saudi Arabia,NA,yes,yes
+Historical Reference,SEN,Senegal,NA,yes,yes
+Historical Reference,SRB,Serbia,NA,yes,yes
+Historical Reference,SYC,Seychelles,NA,yes,yes
+Historical Reference,SLE,Sierra Leone,NA,yes,yes
+Historical Reference,SGP,Singapore,NA,yes,yes
+Historical Reference,SVK,Slovakia,NA,yes,yes
+Historical Reference,SVN,Slovenia,NA,yes,yes
+Historical Reference,SLB,Solomon Islands,NA,yes,yes
+Historical Reference,SOM,Somalia,NA,yes,yes
+Historical Reference,ZAF,South Africa,NA,yes,yes
+Historical Reference,KOR,South Korea,NA,yes,yes
+Historical Reference,SSD,South Sudan,NA,yes,yes
+Historical Reference,ESP,Spain,NA,yes,yes
+Historical Reference,LKA,Sri Lanka,NA,yes,yes
+Historical Reference,SDN,Sudan,NA,yes,yes
+Historical Reference,SUR,Suriname,NA,yes,yes
+Historical Reference,SWE,Sweden,NA,yes,yes
+Historical Reference,CHE,Switzerland,NA,yes,yes
+Historical Reference,SYR,Syria,NA,yes,NA
+Historical Reference,TWN,Taiwan,NA,yes,yes
+Historical Reference,TJK,Tajikistan,NA,yes,yes
+Historical Reference,TZA,Tanzania,NA,yes,yes
+Historical Reference,THA,Thailand,NA,yes,yes
+Historical Reference,TLS,Timor-Leste,NA,yes,yes
+Historical Reference,TGO,Togo,NA,yes,yes
+Historical Reference,TON,Tonga,NA,yes,yes
+Historical Reference,TTO,Trinidad and Tobago,NA,yes,yes
+Historical Reference,TUN,Tunisia,NA,yes,yes
+Historical Reference,TUR,Turkey,NA,yes,yes
+Historical Reference,TKM,Turkmenistan,NA,yes,yes
+Historical Reference,UGA,Uganda,NA,yes,yes
+Historical Reference,UKR,Ukraine,NA,yes,yes
+Historical Reference,ARE,United Arab Emirates,NA,yes,yes
+Historical Reference,GBR,United Kingdom,NA,yes,yes
+Historical Reference,USA,United States,NA,yes,yes
+Historical Reference,VIR,United States Virgin Islands,NA,yes,yes
+Historical Reference,URY,Uruguay,NA,yes,yes
+Historical Reference,UZB,Uzbekistan,NA,yes,yes
+Historical Reference,VUT,Vanuatu,NA,yes,yes
+Historical Reference,VEN,Venezuela,NA,yes,NA
+Historical Reference,VNM,Viet Nam,NA,yes,yes
+Historical Reference,ESH,Western Sahara,NA,yes,yes
+Historical Reference,YEM,Yemen,NA,yes,yes
+Historical Reference,ZMB,Zambia,NA,yes,yes
+Historical Reference,ZWE,Zimbabwe,NA,yes,yes
+SSP1,CUB,Cuba,NA,yes,yes
+SSP1,CUW,Curaçao,NA,yes,NA
+SSP1,GUF,French Guiana,NA,yes,yes
+SSP1,PYF,French Polynesia,NA,yes,yes
+SSP1,GLP,Guadeloupe,NA,yes,NA
+SSP1,GUM,Guam,NA,yes,yes
+SSP1,GUY,Guyana,NA,yes,yes
+SSP1,MTQ,Martinique,NA,yes,NA
+SSP1,MYT,Mayotte,NA,yes,yes
+SSP1,NCL,New Caledonia,NA,yes,yes
+SSP1,PRK,North Korea,NA,yes,yes
+SSP1,REU,Réunion,NA,yes,NA
+SSP1,VIR,United States Virgin Islands,NA,yes,yes
+SSP1,ESH,Western Sahara,NA,yes,yes
+SSP2,CUB,Cuba,NA,yes,yes
+SSP2,CUW,Curaçao,NA,yes,NA
+SSP2,GUF,French Guiana,NA,yes,yes
+SSP2,PYF,French Polynesia,NA,yes,yes
+SSP2,GLP,Guadeloupe,NA,yes,NA
+SSP2,GUM,Guam,NA,yes,yes
+SSP2,GUY,Guyana,NA,yes,yes
+SSP2,MTQ,Martinique,NA,yes,NA
+SSP2,MYT,Mayotte,NA,yes,yes
+SSP2,NCL,New Caledonia,NA,yes,yes
+SSP2,PRK,North Korea,NA,yes,yes
+SSP2,REU,Réunion,NA,yes,NA
+SSP2,VIR,United States Virgin Islands,NA,yes,yes
+SSP2,ESH,Western Sahara,NA,yes,yes
+SSP3,CUB,Cuba,NA,yes,yes
+SSP3,CUW,Curaçao,NA,yes,NA
+SSP3,GUF,French Guiana,NA,yes,yes
+SSP3,PYF,French Polynesia,NA,yes,yes
+SSP3,GLP,Guadeloupe,NA,yes,NA
+SSP3,GUM,Guam,NA,yes,yes
+SSP3,GUY,Guyana,NA,yes,yes
+SSP3,MTQ,Martinique,NA,yes,NA
+SSP3,MYT,Mayotte,NA,yes,yes
+SSP3,NCL,New Caledonia,NA,yes,yes
+SSP3,PRK,North Korea,NA,yes,yes
+SSP3,REU,Réunion,NA,yes,NA
+SSP3,VIR,United States Virgin Islands,NA,yes,yes
+SSP3,ESH,Western Sahara,NA,yes,yes
+SSP4,CUB,Cuba,NA,yes,yes
+SSP4,CUW,Curaçao,NA,yes,NA
+SSP4,GUF,French Guiana,NA,yes,yes
+SSP4,PYF,French Polynesia,NA,yes,yes
+SSP4,GLP,Guadeloupe,NA,yes,NA
+SSP4,GUM,Guam,NA,yes,yes
+SSP4,GUY,Guyana,NA,yes,yes
+SSP4,MTQ,Martinique,NA,yes,NA
+SSP4,MYT,Mayotte,NA,yes,yes
+SSP4,NCL,New Caledonia,NA,yes,yes
+SSP4,PRK,North Korea,NA,yes,yes
+SSP4,REU,Réunion,NA,yes,NA
+SSP4,VIR,United States Virgin Islands,NA,yes,yes
+SSP4,ESH,Western Sahara,NA,yes,yes
+SSP5,CUB,Cuba,NA,yes,yes
+SSP5,CUW,Curaçao,NA,yes,NA
+SSP5,GUF,French Guiana,NA,yes,yes
+SSP5,PYF,French Polynesia,NA,yes,yes
+SSP5,GLP,Guadeloupe,NA,yes,NA
+SSP5,GUM,Guam,NA,yes,yes
+SSP5,GUY,Guyana,NA,yes,yes
+SSP5,MTQ,Martinique,NA,yes,NA
+SSP5,MYT,Mayotte,NA,yes,yes
+SSP5,NCL,New Caledonia,NA,yes,yes
+SSP5,PRK,North Korea,NA,yes,yes
+SSP5,REU,Réunion,NA,yes,NA
+SSP5,VIR,United States Virgin Islands,NA,yes,yes
+SSP5,ESH,Western Sahara,NA,yes,yes
