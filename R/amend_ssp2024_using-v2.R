@@ -384,10 +384,10 @@ p.gdp <- ggplot(
     filter(data.version!="OECD old (unit conversion)"),
   aes(x=year,y=value,
       colour=scenario,
-      # linetype=data.version,
+      linetype=data.version,
       group=interaction(scenario,iso,data.version))
 ) +
-  facet_grid(data.version~iso) +
+  facet_grid(scenario~iso) +
   geom_line(linewidth=1.3) +
   ylab("USD_2017/yr") + xlab(NULL) +
   labs(title = "GDP|PPP [per capita]",
