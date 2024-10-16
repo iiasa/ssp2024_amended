@@ -1,24 +1,11 @@
 # ssp2024_amended: Use SSP v3 data and amend it where data for some countries is missing.
 #' Produced by Jarmo Kikstra
 #'
+#' Latest update: 08.10.2024
+#' - add versions based on a country's R10 share
 #' Latest update: 14.08.2024
 #' - initial version
 #'
-#'
-
-
-# TODO list --------------------------------------------------------------------
-#' - [x] read in data v3
-#' - [x] identify & report missing data
-#' - [x] switch from v3.0.1 to v3.1 data
-#' - [x] save out how much of the global population is missing (in 2025 and each timestep, in % and totals?)
-#' - [ ] fill in missing data
-#'     - [x] method: using v2 trajectories after converting units using GDPuc, and IIASA v3 trajectories otherwise (if price data is not available)
-#'     - [x] method: using v3 IIASA trajectories
-#'     - [ ] method: using v2 relationships (to another country or other countries)
-#'            - [ ] explore performance using SSP v2?
-#'     - [ ] method: R10 share in iiasa projections of each country, and apply that to OECD
-#'     - [ ] method: R10 share in OECD SSPv2 projections
 #'
 
 # Load libraries ---------------------------------------------------------------
@@ -155,10 +142,6 @@ write_delim(
   file = file.path(output.folder, "country_missing_sspv31.csv"),
   delim = ","
 )
-
-##### missing GDP of countries, in terms of population -------------------------
-# tbd
-
 
 
 # Create amended SSPv3 (fill missing countries in OECD GDP) --------------------
@@ -387,7 +370,7 @@ p.gdp <- ggplot(
       linetype=data.version,
       group=interaction(scenario,iso,data.version))
 ) +
-  facet_grid(scenario~iso) +
+  facet_grid(scenario~iso, scales="free_y") +
   geom_line(linewidth=1.3) +
   ylab("USD_2017/yr") + xlab(NULL) +
   labs(title = "GDP|PPP [per capita]",
