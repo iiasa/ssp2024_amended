@@ -1,7 +1,7 @@
 # ssp2024_amended
 In the current version of the SSP economic data (v3.1), a few countries do not have GDP data from the OECD ENV-Growth model.
 
-The script [R/amend_ssp2024.R](https://github.com/iiasa/ssp2024_amended/blob/main/R/amend_ssp2024.R) currently adds these countries only in two simple ways:
+The script [R/amend_ssp2024.R](https://github.com/iiasa/ssp2024_amended/blob/main/R/amend_ssp2024.R) currently adds these countries only in a few simple ways:
 
 1. Taking the IIASA pathways for these missing countries. (generally lowest GDP/cap outcome)
 
