@@ -20,6 +20,10 @@ Thoughts: I think this has two potential issues. (1) the 2025 value is probably 
 
 Thoughts: I think this might be an acceptable middle-of-the-road option, where we (a) follow the general OECD growth trajectory of the region, and (b) incorporate recent evidence on recent challenges [having the same starting point as IIASA] for 2025 numbers; e.g. Venezuela in 2025 has GDP|PPP of 6k/cap. 
 
+4. Use IIASA starting point data and apply regional (R10) growth rates. 
+
+Thoughts: Very simple method, which is a advantage. But does not capture any country-level dynamics relative to the region - which would probably be a nice-to-have for the countries that are missing.
+
 Folder structure:
 * R: scripts
 * input: data inputs (SSP releases)
