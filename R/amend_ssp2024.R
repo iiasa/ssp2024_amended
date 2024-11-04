@@ -1,6 +1,8 @@
 # ssp2024_amended: Use SSP v3 data and amend it where data for some countries is missing.
 #' Produced by Jarmo Kikstra
 #'
+#' Latest update: 04.11.2024
+#' - add regional growth rates
 #' Latest update: 08.10.2024
 #' - add versions based on a country's R10 share
 #' Latest update: 14.08.2024
@@ -27,9 +29,10 @@ source(here("R","utils.R"))
 # Previous versions:
 # version.demands <- "20240813_v1" # only shared with Bas on Teams, on 14.08.2024 only missing data analysis
 # version.demands <- "20240814_v1" # newest version; updated to SSPv3.1
+# version.demands <- "20241008_v2" # add R10 shares methods
 
 # Current version
-version.demands <- "20241008_v2" # add R10 shares methods
+version.demands <- "20241104_v3" # add R10 growth rates method
 
 output.folder <- here("output",version.demands)
 dir.create(output.folder)
@@ -343,6 +346,64 @@ sspv2.oecdr10shares.forv3.percapita.GDP.GDPpc <- sspv2.oecdr10shares.forv3 %>% b
 
 
 
+### R10 growth rates-based -----------------------------------------------------
+# sspv3.iiasa.starting.year <- sspv3.iiasa.forv3 %>% filter(year==2025)
+# sspv3.r10.oecd.growthrates <- r10.gdp.oecdv3 %>%
+#   arrange(model,scenario,region_r10,variable,unit,
+#           year) %>%
+#   group_by(model,scenario,region_r10,variable,unit) %>%
+#   mutate(growth.rate = (value_r10 / lag(value_r10))^(1/(year-lag(year))) - 1 )
+sspv3.r10.oecd.normalised <- r10.gdp.oecdv3 %>%
+  rename(region=region_r10, value=value_r10) %>%
+  normalise_iamc_long(starting.year = 2025) %>%
+  rename(region_r10=region, normalised.value_r10=value)
+
+sspv3.iiasa.forv3.2025 <- sspv3.iiasa.forv3 %>% filter(year==2025) %>%
+  rename(value2025=value)
+sspv3.iiasa.forv3amended.R10growthrates <- sspv3.iiasa.forv3 %>%
+  mutate_cond(year!=2025, value=NA) %>%
+  mutate(model="OECD ENV-Growth 2023") %>%
+  left_join(
+    r10
+  ) %>%
+  # calculate new growth-rate based values (growth.rate)
+  # left_join(
+  #   sspv3.r10.oecd.growthrates
+  # ) %>%
+  # group_by(model,scenario,region,variable,unit) %>%
+  # mutate(
+  #   # year!=2025,
+  #   value.recon = lag(value) * (1+growth.rate)^(year - lag(year))
+  # ) %>%
+  # calculate new value based on normalised value
+  left_join(
+    sspv3.r10.oecd.normalised
+  ) %>%
+  left_join(
+    sspv3.iiasa.forv3.2025 %>% select(-model,-year)
+  ) %>%
+  mutate_cond(
+    year!=2025,
+    value = value2025 * normalised.value_r10
+  )
+
+## calculate values in the same unit
+# already in same unit
+## bring into same format
+# already in same format
+## calculate per capita values in the same unit
+sspv3.iiasa.forv3amended.R10growthrates.percapita <- sspv3.iiasa.forv3amended.R10growthrates %>% left_join(
+  sspv3.population.marker %>% select(scenario,iso,year,value) %>% rename(population.million = value)
+) %>%
+  mutate(
+    variable="GDP|PPP [per capita]",
+    unit = "USD_2017/yr",
+    value = value*1e9/(population.million*1e6)
+  ) %>% select(-population.million)
+
+sspv3.iiasa.forv3amended.R10growthrates.GDP.GDPpc <- sspv3.iiasa.forv3amended.R10growthrates %>% bind_rows(sspv3.iiasa.forv3amended.R10growthrates.percapita)
+
+
 
 ### COMBINE versions -----------------------------------------------------------
 
@@ -352,6 +413,7 @@ sspv3.future.marker.data.long <- sspv3.oecd %>% mutate(data.version="OECD") %>%
   bind_rows(sspv3.iiasa.forv3.GDP.GDPpc %>% mutate(data.version="IIASA")) %>%
   bind_rows(sspv2.oecdr10shares.forv3.percapita.GDP.GDPpc %>% mutate(data.version="Using old OECD R10 shares")) %>%
   bind_rows(sspv3.iiasar10shares.forv3.percapita.GDP.GDPpc %>% mutate(data.version="Using IIASA R10 shares")) %>%
+  bind_rows(sspv3.iiasa.forv3amended.R10growthrates.GDP.GDPpc %>% mutate(data.version="Using OECD R10 growth rates + IIASA 2025")) %>%
   select(-model,-region.name,
          scenario,iso,variable,unit,year,value,data.version)
 sspv3.future.marker.data <- sspv3.future.marker.data.long %>%
@@ -371,12 +433,15 @@ p.gdp <- ggplot(
       group=interaction(scenario,iso,data.version))
 ) +
   facet_grid(scenario~iso, scales="free_y") +
-  geom_line(linewidth=1.3) +
+  geom_line(linewidth=0.4) +
+  geom_point(aes(shape=data.version))+
   ylab("USD_2017/yr") + xlab(NULL) +
   labs(title = "GDP|PPP [per capita]",
        subtitle = "Different infilling options") +
   theme_jsk() +
   scale_color_ptol() +
+  guides(linetype = guide_legend(ncol = 2),
+         shape = guide_legend(ncol = 2))
   mark_history(sy=2025)
 
 p.gdp
@@ -384,7 +449,7 @@ p.gdp
 save_ggplot(
   p = p.gdp,
   f = file.path(output.folder, "gdp_sspv31_infillingoptions"),
-  w = 300,
+  w = 350,
   h = 200
 )
 
@@ -394,6 +459,8 @@ write_delim(
   file = file.path(output.folder, "gdp_sspv31_withallextradata.csv"),
   delim = ","
 )
+
+
 
 
 # ### SELECT and SAVE priorities -------------------------------------------------
