@@ -441,7 +441,7 @@ p.gdp <- ggplot(
   theme_jsk() +
   scale_color_ptol() +
   guides(linetype = guide_legend(ncol = 2),
-         shape = guide_legend(ncol = 2))
+         shape = guide_legend(ncol = 2)) +
   mark_history(sy=2025)
 
 p.gdp
