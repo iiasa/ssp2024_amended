@@ -1,6 +1,8 @@
 # ssp2024_amended: Use SSP v3 data and amend it where data for some countries is missing.
 #' Produced by Jarmo Kikstra
 #'
+#' Latest update: 14.11.2024
+#' - add and compare with OECD for new countries
 #' Latest update: 04.11.2024
 #' - add regional growth rates
 #' Latest update: 08.10.2024
@@ -462,64 +464,126 @@ write_delim(
 
 
 
+# New OECD numbers -------------------------------------------------------------
+## Load ------------------------------------------------------------------------
+new.oecd.numbers <- read_excel(path = here("data", "oecd_new", "Submission additional countries approximation.xlsx")) %>%
+  rename(
+    model = `...1`,
+    scenario = `...2`,
+    iso = `...3`,
+    variable = `...4`,
+    unit = `...5`
+  ) %>%
+  iamc_wide_to_long() %>%
+  mutate_cond(variable=="GDP_per_capita|PPP", variable = "GDP|PPP [per capita]") %>%
+  mutate(scenario = substr(scenario, 1,4))
 
-# ### SELECT and SAVE priorities -------------------------------------------------
-# ## OECD versions first
-# sspv3.amended.oecdfirst <- sspv3.future.marker.data %>%
-#   mutate(value=`OECD ENV-Growth 2023`) %>% # first choice marker
-#   mutate_cond((
-#     (
-#     is.na(value)|value==0
-#     )&(
-#     !((is.na(`OECD Env-Growth`))|(`OECD Env-Growth`==0))
-#     )
-#   ),
-#               value = `OECD Env-Growth`) %>% # add OECD SSPv2
-#   mutate_cond((
-#     (
-#       is.na(value)|value==0
-#     )&(
-#       !((is.na(`IIASA GDP 2023`))|(`IIASA GDP 2023`==0))
-#     )
-#   ),
-#               value = `IIASA GDP 2023`) %>%  # add IIASA SSPv3
-#   # reformat
-#   mutate(model = "GDP marker (amended)") %>%
-#   select(model,scenario,iso,variable,unit,year,value) %>%
-#   rename(Model = model, Scenario = scenario, Region = iso, Variable = variable, Unit = unit) %>%
-#   pivot_wider(values_from = value, names_from = year)
-#
-# write_delim(
-#   x = sspv3.amended.oecdfirst,
-#   file = file.path(output.folder, "gdp_sspv31_markeramended_oecdfirst.csv"),
-#   delim = ","
-# )
-#
-#
-# ## v3 version first
-# sspv3.amended.v3only <- sspv3.future.marker.data %>%
-#   mutate(value=`OECD ENV-Growth 2023`) %>% # first choice marker
-#   mutate_cond((
-#     (
-#       is.na(value)|value==0
-#     )&(
-#       !((is.na(`IIASA GDP 2023`))|(`IIASA GDP 2023`==0))
-#     )
-#   ),
-#   value = `IIASA GDP 2023`) %>%  # add IIASA SSPv3
-#   # reformat
-#   mutate(model = "GDP marker (amended)") %>%
-#   select(model,scenario,iso,variable,unit,year,value) %>%
-#   rename(Model = model, Scenario = scenario, Region = iso, Variable = variable, Unit = unit) %>%
-#   pivot_wider(values_from = value, names_from = year)
-#
-#
-# write_delim(
-#   x = sspv3.amended.v3only,
-#   file = file.path(output.folder, "gdp_sspv31_markeramended_v3only.csv"),
-#   delim = ","
-# )
+## Compare ------------------------------------------------------------------------
+compare.filling.options.to.oecd <- sspv3.future.marker.data.long %>% filter(iso%in%sspv3.oecd.missingcountries) %>%
+  # bind new oecd numbers
+  bind_rows(new.oecd.numbers %>% mutate(data.version = "New OECD approximated countries")) %>%
+  # calculate diff to new oecd numbers
+  left_join(
+    new.oecd.numbers %>% rename(new.oecd = value) %>% select(-model)
+  ) %>%
+  mutate(diff = value - new.oecd)
 
+### Absolutes ------------------------------------------------------------------
+p.gdp.w.new.oecd <- ggplot(
+  compare.filling.options.to.oecd %>% filter(iso%in%sspv3.oecd.missingcountries) %>%
+    filter(variable=="GDP|PPP [per capita]") %>%
+    filter(data.version!="OECD old (unit conversion)"),
+  aes(x=year,y=value,
+      colour=scenario,
+      linetype=data.version,
+      group=interaction(scenario,iso,data.version))
+) +
+  facet_grid(scenario~iso, scales="free_y") +
+  geom_line(linewidth=0.4) +
+  geom_point(aes(shape=data.version))+
+  ylab("USD_2017/yr") + xlab(NULL) +
+  labs(title = "GDP|PPP [per capita]",
+       subtitle = "Different infilling options") +
+  theme_jsk() +
+  scale_color_ptol() +
+  guides(linetype = guide_legend(ncol = 2),
+         shape = guide_legend(ncol = 2)) +
+  mark_history(sy=2025)
 
+p.gdp.w.new.oecd
 
+save_ggplot(
+  p = p.gdp.w.new.oecd,
+  f = file.path(output.folder, "gdp_sspv31_infillingoptions_compareNewOECDApproximatedCountries"),
+  w = 350,
+  h = 200
+)
 
+p.gdp.w.new.oecd.until2050 <- ggplot(
+  compare.filling.options.to.oecd %>% filter(iso%in%sspv3.oecd.missingcountries) %>%
+    filter(variable=="GDP|PPP [per capita]") %>%
+    filter(data.version!="OECD old (unit conversion)") %>%
+    filter(year<=2050),
+  aes(x=year,y=value,
+      colour=scenario,
+      linetype=data.version,
+      group=interaction(scenario,iso,data.version))
+) +
+  facet_grid(scenario~iso, scales="free_y") +
+  geom_line(linewidth=0.4) +
+  geom_point(aes(shape=data.version))+
+  ylab("USD_2017/yr") + xlab(NULL) +
+  labs(title = "GDP|PPP [per capita]",
+       subtitle = "Different infilling options") +
+  theme_jsk() +
+  scale_color_ptol() +
+  guides(linetype = guide_legend(ncol = 2),
+         shape = guide_legend(ncol = 2)) +
+  mark_history(sy=2025)
+
+p.gdp.w.new.oecd.until2050
+
+save_ggplot(
+  p = p.gdp.w.new.oecd.until2050,
+  f = file.path(output.folder, "gdp_sspv31_infillingoptions_compareNewOECDApproximatedCountries_until2050"),
+  w = 350,
+  h = 200
+)
+
+### Absolutes ------------------------------------------------------------------
+p.gdp.w.new.oecd.diff <- ggplot(
+  compare.filling.options.to.oecd %>% filter(iso%in%sspv3.oecd.missingcountries) %>%
+    filter(variable=="GDP|PPP [per capita]") %>%
+    filter(data.version!="OECD old (unit conversion)"),
+  aes(x=year,y=diff,
+      colour=scenario,
+      linetype=data.version,
+      group=interaction(scenario,iso,data.version))
+) +
+  facet_grid(scenario~iso, scales="free_y") +
+  geom_line(linewidth=0.4) +
+  geom_point(aes(shape=data.version))+
+  ylab("USD_2017/yr") + xlab(NULL) +
+  labs(title = "GDP|PPP [per capita]",
+       subtitle = "New OECD - Different infilling options") +
+  theme_jsk() +
+  scale_color_ptol() +
+  guides(linetype = guide_legend(ncol = 2),
+         shape = guide_legend(ncol = 2)) +
+  mark_history(sy=2025)
+
+p.gdp.w.new.oecd.diff
+
+save_ggplot(
+  p = p.gdp.w.new.oecd.diff,
+  f = file.path(output.folder, "gdp_sspv31_infillingoptions_compareNewOECDApproximatedCountries_diff"),
+  w = 350,
+  h = 200
+)
+
+### Write out CSV --------------------------------------------------------------
+write_delim(
+  x = compare.filling.options.to.oecd,
+  file = file.path(output.folder, "gdp_sspv31_compareNewOECDApproximatedCountries.csv"),
+  delim = ","
+)
