@@ -1,6 +1,8 @@
 # ssp2024_amended: Use SSP v3 data and amend it where data for some countries is missing.
 #' Produced by Jarmo Kikstra
 #'
+#' Latest update: 28.11.2024
+#' - add and compare with OECD for new countries (v2)
 #' Latest update: 14.11.2024
 #' - add and compare with OECD for new countries
 #' Latest update: 04.11.2024
@@ -32,9 +34,10 @@ source(here("R","utils.R"))
 # version.demands <- "20240813_v1" # only shared with Bas on Teams, on 14.08.2024 only missing data analysis
 # version.demands <- "20240814_v1" # newest version; updated to SSPv3.1
 # version.demands <- "20241008_v2" # add R10 shares methods
+# version.demands <- "20241104_v3" # add R10 growth rates method
 
 # Current version
-version.demands <- "20241104_v3" # add R10 growth rates method
+version.demands <- "20242804_v4" # same methods as before, but now compared to new OECD data (email from Rob Dellink on 23 Nov 2024), and with new IIASA GDP data (email from Jesus Crespo Cuaresma on )
 
 output.folder <- here("output",version.demands)
 dir.create(output.folder)
@@ -67,7 +70,129 @@ sspv3 <- read_excel(
   mutate_cond(region=="Micronesia", region="Micronesia (Federated States of)") %>% # countrycode package doesn't recognise "Micronesia" by itself
   mutate(iso=countrycode(region, origin = "country.name", destination = "iso3c")) %>%
   drop_na(iso)
+
+###### Set population marker ---------------------------------------------------
 sspv3.population.marker <- sspv3 %>% filter(variable=="Population")
+
+###### Check GDP per capita ----------------------------------------------------
+sspv3.gdppcap.oecd <- sspv3 %>%
+  filter(variable=="GDP|PPP [per capita]",
+         model=="OECD ENV-Growth 2023")
+
+gdp.pcap.oecd <- ggplot(sspv3.gdppcap.oecd,
+       aes(group=interaction(model,scenario,iso,variable,unit),
+           x=year,
+           colour=scenario)) +
+  facet_wrap(~iso, scales = "free") +
+  geom_line(aes(y=value/1e3), linetype="solid") +
+  ylab("Thousands USD_2017/yr") + xlab(NULL) +
+  labs(title = "GDP|PPP [per capita]",
+       subtitle = "OECD SSP standard version") +
+  theme_jsk() +
+  scale_color_ptol() +
+  scale_x_continuous(breaks = c(2025,2100)) +
+  guides(linetype = guide_legend(ncol = 2),
+         shape = guide_legend(ncol = 2)) +
+  mark_history(sy=2025)
+
+save_ggplot(
+  p = gdp.pcap.oecd,
+  f = file.path(output.folder, "gdp_sspv31_oecd_standard"),
+  w = 350,
+  h = 500
+)
+
+# check countries missing history 2010,2015,2020
+ssp.countries.covered <- sspv3.gdppcap.oecd %>% filter(year==2025) %>%
+  distinct(scenario,iso)
+ssp.countries.covered %>% group_by(scenario) %>% count()
+history.countries.covered <- sspv3.gdppcap.oecd %>% filter(year%in%c(2010,2015,2020),
+                                                           scenario=="Historical Reference") %>%
+  iamc_long_to_wide() %>%
+  mutate(history2010 = ifelse( !is.na(`2010`) & !is.na(`2015`) & !is.na(`2020`),
+                               "yes",
+                               "missing")) %>%
+  distinct(scenario,region,iso,history2010)
+history.countries.covered %>% group_by(scenario,history2010) %>% count()
+history.countries.covered %>% filter(history2010=="missing") %>% distinct(region,iso)
+
+
+###### Load updated IIASA GDP --------------------------------------------------
+sspv3.iiasa.updated.GDP <- vroom(here("data", "iiasa_updated", "SSP_IIASA_GDP_2023_data_explorer.CSV")) %>%
+  rename(scenario = scen, iso = iso3c) %>%
+  mutate(model = "IIASA GDP 2023")
+
+###### Replace IIASA GDP -------------------------------------------------------
+iiasa.total.gdp <- sspv3 %>% left_join(sspv3.iiasa.updated.GDP) %>% filter(variable=="GDP|PPP",
+                                                        model=="IIASA GDP 2023")
+iiasa.total.gdp.w.pc <- iiasa.total.gdp %>%
+  left_join(
+    sspv3.population.marker %>% select(scenario,iso,year,value) %>% rename(pop_mil = value)
+  ) %>%
+  mutate(value_pc = value/pop_mil * 1e3 ) %>%
+  mutate(NEW.check.percap.diff = (GDP_PPP / pop_mil * 1e3) - GDP_PPP_CAP) %>%
+  mutate(SHOW.percap.diff = GDP_PPP_CAP - value_pc)
+
+# visually compare
+p.compare.sspv3.iiasa.updated.GDP <- ggplot(iiasa.total.gdp.w.pc,
+       aes(group=interaction(model,scenario,iso,variable,unit),
+           x=year,
+           colour=scenario)) +
+  facet_wrap(~iso, scales = "free") +
+  geom_line(aes(y=value/1e3), linetype="dotted") +
+  geom_line(aes(y=GDP_PPP/1e3), linetype="solid") +
+  ylab("Thousands USD_2017/yr") + xlab(NULL) +
+  labs(title = "GDP|PPP",
+       subtitle = "IIASA (updated = solid, public = dotted)") +
+  theme_jsk() +
+  scale_color_ptol() +
+  scale_x_continuous(breaks = c(2025,2100)) +
+  guides(linetype = guide_legend(ncol = 2),
+         shape = guide_legend(ncol = 2)) +
+  mark_history(sy=2025)
+
+save_ggplot(
+  p = p.compare.sspv3.iiasa.updated.GDP,
+  f = file.path(output.folder, "gdp_total_iiasa_update"),
+  w = 350,
+  h = 500
+)
+
+# visually compare
+p.compare.sspv3.iiasa.updated.GDP <- ggplot(iiasa.total.gdp.w.pc,
+                                            aes(group=interaction(model,scenario,iso,variable,unit),
+                                                x=year,
+                                                colour=scenario)) +
+  facet_wrap(~iso, scales = "free") +
+  geom_line(aes(y=value_pc/1e3), linetype="dotted") +
+  geom_line(aes(y=GDP_PPP_CAP/1e3), linetype="solid") +
+  ylab("Thousands USD_2017/yr") + xlab(NULL) +
+  labs(title = "GDP|PPP",
+       subtitle = "IIASA (updated = solid, public = dotted)") +
+  theme_jsk() +
+  scale_color_ptol() +
+  scale_x_continuous(breaks = c(2025,2100)) +
+  guides(linetype = guide_legend(ncol = 2),
+         shape = guide_legend(ncol = 2)) +
+  mark_history(sy=2025)
+
+save_ggplot(
+  p = p.compare.sspv3.iiasa.updated.GDP,
+  f = file.path(output.folder, "gdp_cap_iiasa_update"),
+  w = 350,
+  h = 500
+)
+
+# replace
+usspv3.iiasa <- sspv3 %>% left_join(sspv3.iiasa.updated.GDP) %>%
+  mutate(value = GDP_PPP) %>% select(-GDP_PPP, -GDP_PPP_CAP)
+
+sspv3 <- sspv3 %>%
+  # filter out old
+  filter(model!="IIASA GDP 2023") %>%
+  # add updated
+  bind_rows(usspv3.iiasa %>% filter(model=="IIASA GDP 2023"))
+
 
 
 ### SSPv2 (original) data ------------------------------------------------------
@@ -466,7 +591,7 @@ write_delim(
 
 # New OECD numbers -------------------------------------------------------------
 ## Load ------------------------------------------------------------------------
-new.oecd.numbers <- read_excel(path = here("data", "oecd_new", "Submission additional countries approximation.xlsx")) %>%
+new.oecd.numbers <- read_excel(path = here("data", "oecd_new", "Submission additional countries approximation v2.xlsx")) %>%
   rename(
     model = `...1`,
     scenario = `...2`,
@@ -550,7 +675,7 @@ save_ggplot(
   h = 200
 )
 
-### Absolutes ------------------------------------------------------------------
+### Differences ------------------------------------------------------------------
 p.gdp.w.new.oecd.diff <- ggplot(
   compare.filling.options.to.oecd %>% filter(iso%in%sspv3.oecd.missingcountries) %>%
     filter(variable=="GDP|PPP [per capita]") %>%
@@ -586,4 +711,37 @@ write_delim(
   x = compare.filling.options.to.oecd,
   file = file.path(output.folder, "gdp_sspv31_compareNewOECDApproximatedCountries.csv"),
   delim = ","
+)
+
+
+### Absolutes until 2050 (only IIASA new and OECD new) -------------------------
+p.newoecd.upiiasa <- ggplot(
+  compare.filling.options.to.oecd %>% filter(iso%in%sspv3.oecd.missingcountries) %>%
+    filter(variable=="GDP|PPP [per capita]") %>%
+    filter(data.version%in%c("IIASA", "New OECD approximated countries")) %>%
+    filter(year<=2050),
+  aes(x=year,y=value,
+      colour=scenario,
+      linetype=data.version,
+      group=interaction(scenario,iso,data.version))
+) +
+  facet_grid(scenario~iso, scales="free_y") +
+  geom_line(linewidth=0.4) +
+  geom_point(aes(shape=data.version))+
+  ylab("USD_2017/yr") + xlab(NULL) +
+  labs(title = "GDP|PPP [per capita]",
+       subtitle = "Updated values") +
+  theme_jsk() +
+  scale_color_ptol() +
+  guides(linetype = guide_legend(ncol = 2),
+         shape = guide_legend(ncol = 2)) +
+  mark_history(sy=2025)
+
+p.newoecd.upiiasa
+
+save_ggplot(
+  p = p.newoecd.upiiasa,
+  f = file.path(output.folder, "gdp_NewOECD_UpdatedIIASA_until2050"),
+  w = 350,
+  h = 200
 )

@@ -1,0 +1,5 @@
+scen: SSP-scenario
+iso3c: country in the 3-character ISO-standard
+year: year
+GDP_PPP: projected GDP in billion USD17/year
+GDP_PPP_CAP: projected GDP per capita in USD17/year
