@@ -3613,6 +3613,27 @@ save_ggplot = function(p,f,h=150,w=150,format="png-pdf",unit="mm",
   }
 }
 
+### String utils ---------------------------------------------------------------
+#' Clean a String by Removing Non-Alphanumeric Characters
+#'
+#' This function removes all non-alphanumeric characters (anything that is
+#' not a letter or a number) from the input string. Spaces, punctuation,
+#' and special characters are removed, leaving only letters and numbers.
+#'
+#' @param x A character string to be cleaned.
+#'
+#' @return A character string containing only letters and numbers.
+#'
+#' @examples
+#' clean_string("Hello World | R123!")  # Returns "HelloWorldR123"
+#' clean_string("Data-Science_2024!")  # Returns "DataScience2024"
+#'
+#' @export
+clean_string <- function(x) {
+  gsub("[^a-zA-Z0-9]", "", x)
+}
+
+
 ### Data manipulation ----------------------------------------------------------
 # The opposite of %in%, to be used in a dplyr::filter() call
 `%nin%` <- Negate(`%in%`)
