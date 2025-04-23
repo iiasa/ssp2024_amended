@@ -207,7 +207,7 @@ for (var in variables.to.investigate){
 
       save_ggplot(
         p = p.ts,
-        f = file.path(out.path.figures, paste0(clean_string(var),"_",y.version,"_", i)),
+        f = file.path(out.path.figures, "country_pdfs", paste0(clean_string(var),"_",y.version,"_", i)),
         w = 150,
         h = 65,
         format = "pdf",
@@ -220,14 +220,14 @@ for (var in variables.to.investigate){
 for (var in variables.to.investigate){
   for (y.version in c("2015_2030", "until2100")){
     path.model.out <- file.path(out.path.figures, "combined_pdfs")
-    path.model.in <- out.path.figures
+    path.model.in <- file.path(out.path.figures, "country_pdfs")
 
-    FILES.pdf <- file.path(path.model.in, dir(path.model.in, pattern = paste0("*",y.version,"*.pdf")))  # get file names
+    FILES.pdf <- file.path(path.model.in, dir(path.model.in, pattern = ("*.pdf")))  # get file names
 
-    OUT_FILE_NAME <- file.path(path.model.out, paste0(clean_string(var),"_",y.version,".pdf") )
+    OUT_FILE_NAME <- file.path(path.model.out, paste0(clean_string(var),"_",y.version,"_combined.pdf"))
 
     qpdf::pdf_combine(
-      input = FILES.pdf,
+      input = FILES.pdf[((grepl(FILES.pdf, pattern=y.version,fixed=T)))],
       output = OUT_FILE_NAME
     )
 
