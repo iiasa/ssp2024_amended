@@ -22,6 +22,7 @@ here::i_am("ssp2024_amended.Rproj")
 
 source(here("R","utils.R"))
 
+new.version <- "v20250417_gdp"
 out.path.figures <- here("output", new.version, "figures")
 dir.create(out.path.figures, recursive = T)
 out.path.data <- here("output", new.version, "data")
@@ -37,6 +38,7 @@ oecd2023name.supplemental <- "OECD ENV-Growth (supplemental)"
 
 unit.gdp <- "billion USD_2017/yr"
 
+GDP.YEARS.TO.KEEP <- seq(1950,2100,5)
 
 ## Load ----
 ### v3.1 -----------------------------------------------------------------------
@@ -155,7 +157,8 @@ kosovo.future.wdetail <-
   mutate(value.2025 = kosovo.starting.point.2025) %>%
   # apply calculation
   mutate_cond(
-    is.na(value), value = value.2025 * index,
+    (is.na(value) & year>2025),
+    value = value.2025 * index,
     unit = unit.gdp
   )
 
@@ -186,7 +189,11 @@ new.oecd.gdp.ppp <- v3_1 %>%
   bind_rows(kosovo.future %>%
               mutate(region=NA_character_) %>%
               #' follow SSP population names
-              mutate_cond(iso==KOSOVO.ISO3.CODE, region = kosovo.region.name))
+              mutate_cond(iso==KOSOVO.ISO3.CODE, region = kosovo.region.name)) %>%
+  # keep only certain years
+  filter(
+    year %in% GDP.YEARS.TO.KEEP
+  )
 
 ## SAVE FINALISED GDP DATA ----
 write_delim(
