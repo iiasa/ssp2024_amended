@@ -3,7 +3,8 @@
 #'
 #' Latest update: 23.04.2025
 #' - initial version, based on data shared by Samir KC on
-#'
+#' Latest update: 25.04.2025
+#' - split out combining of dataframe of new data for GDP calculation
 
 #'
 #' Notes (23.04.2025, version 'V15 rebase')
@@ -72,40 +73,7 @@ v3_1 <- v3_1 %>%
   filter(variable %nin% c("GDP|PPP", "GDP|PPP [per capita]"))
 
 ### new ------------------------------------------------------------------------
-new <-
-  bind_rows(
-    vroom(here("data", "final_new_population", new_filename_UN_historical), locale = locale(encoding = "ISO-8859-1")),
-    bind_rows(
-      vroom(here("data", "final_new_population", new_filename_population), locale = locale(encoding = "ISO-8859-1")),
-      vroom(here("data", "final_new_population", new_filename_education), locale = locale(encoding = "ISO-8859-1"))
-    )
-  ) %>%
-  iamc_wide_to_long(upper.to.lower = T) %>%
-  mutate_cond(region=="Micronesia", region="Micronesia (Federated States of)") %>% # countrycode package doesn't recognise "Micronesia" by itself
-  mutate(iso=countrycode(region, origin = "country.name", destination = "iso3c")) %>%
-  mutate_cond(region=="Kosovo", iso=KOSOVO.ISO3.CODE) %>%
-  drop_na(iso) %>%  # drop regions
-  filter(
-    model != "UN WPP2022 POP" # exclude historical reference data
-  ) %>%
-  # some formatting to get the same format as from the SSP database
-  mutate(
-    model = "IIASA-WiC POP 2023",
-    scenario = substr(scenario,start=1,stop=4)
-  ) %>%
-  # fix value to align with unit
-  mutate_cond(
-    grepl(variable, pattern="Population", fixed=T),
-    value = value/1000
-  )
-
-## SAVE NEW LONG FORMAT DATA FOR USE IN CALCULATING GDP per capita -------------
-
-write_delim(
-  x = new %>% filter(variable=="Population"),
-  file = here("output", "v20250417_pop", "data", "POPULATION_longformat.csv"),
-  delim = ","
-)
+source(here("R","create_new_iiasa_population_combined_dataframe.R"))
 
 ## Compare: check formats - same variables, more countries ---------------------
 
