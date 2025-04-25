@@ -198,7 +198,7 @@ new.oecd.gdp.ppp <- v3_1 %>%
 ## SAVE FINALISED GDP DATA ----
 write_delim(
   x = new.oecd.gdp.ppp,
-  file = here("output", "v20250417_gdp", "data", "GDP_PPP_longformat.csv"),
+  file = here("output", new.version, "data", "GDP_PPP_longformat.csv"),
   delim = ","
 )
 
@@ -223,7 +223,7 @@ p.growth
 
 save_ggplot(
   p = p.growth,
-  f = here("output", "v20250417_gdp", "figures", "indexed_growth_comparison_kosovo"),
+  f = here("output", new.version, "figures", "indexed_growth_comparison_kosovo"),
   w = 150,
   h = 150,
   format = "pdf"

@@ -19,6 +19,8 @@ here::i_am("ssp2024_amended.Rproj")
 
 source(here("R","utils.R"))
 
+new.version <- "v20250417_gdp"
+
 # Load v3.1 for GDP format ----
 year.columns <- c("1950", "1955", "1960", "1965", "1970", "1975", "1980", "1985",
                   "1990", "1995", "2000", "2005", "2010", "2015", "2020", "2025",
@@ -53,7 +55,7 @@ gdp_format_v3_1 %>% distinct(
 ## Updated OECD GDP ----
 # from: "R/create_new_oecd_gdp_dataframe_with_kosovo.R"
 gdp <- read_csv(
-  here("output", "v20250417_gdp", "data", "GDP_PPP_longformat.csv")
+  here("output", new.version, "data", "GDP_PPP_longformat.csv")
 )
 
 
@@ -137,6 +139,6 @@ expect_equal(
 ## SAVE FINALISED GDP DATA ----
 write_delim(
   x = gdp.per.capita,
-  file = here("output", "v20250417_gdp", "data", "GDP_PPP_percapita_longformat.csv"),
+  file = here("output", new.version, "data", "GDP_PPP_percapita_longformat.csv"),
   delim = ","
 )
