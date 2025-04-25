@@ -40,6 +40,8 @@ dir.create(out.path.data, recursive = T)
 
 # Compare against v3.1 ---------------------------------------------------------
 
+source(here("R", "KOSOVO_ISO3CODE.R"))
+
 ## Load ----
 ### v3.1 -----------------------------------------------------------------------
 # N.B. need to force the read_excel function to read all year_columns as numeric
@@ -81,7 +83,7 @@ new <-
   iamc_wide_to_long(upper.to.lower = T) %>%
   mutate_cond(region=="Micronesia", region="Micronesia (Federated States of)") %>% # countrycode package doesn't recognise "Micronesia" by itself
   mutate(iso=countrycode(region, origin = "country.name", destination = "iso3c")) %>%
-  mutate_cond(region=="Kosovo", iso="KSV") %>%
+  mutate_cond(region=="Kosovo", iso=KOSOVO.ISO3.CODE) %>%
   drop_na(iso) %>%  # drop regions
   filter(
     model != "UN WPP2022 POP" # exclude historical reference data
@@ -96,6 +98,14 @@ new <-
     grepl(variable, pattern="Population", fixed=T),
     value = value/1000
   )
+
+## SAVE NEW LONG FORMAT DATA FOR USE IN CALCULATING GDP per capita -------------
+
+write_delim(
+  x = new %>% filter(variable=="Population"),
+  file = here("output", "v20250417_pop", "data", "POPULATION_longformat.csv"),
+  delim = ","
+)
 
 ## Compare: check formats - same variables, more countries ---------------------
 
@@ -117,7 +127,7 @@ setdiff(new.iso, v3_1.iso) # in new, not in old
 expect_equal(length(setdiff(new.iso, v3_1.iso)),
              1)
 expect_equal(setdiff(new.iso, v3_1.iso),
-             "KSV")
+             KOSOVO.ISO3.CODE)
 
 # more countries
 expect_gt(length(new.iso),
