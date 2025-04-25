@@ -64,6 +64,12 @@ v3_1_wide <- v3_1 %>%
   ) %>%
   mutate(diff.population = implied.population - `Population`,
          diff.population.perc = (implied.population - `Population`)/`Population` * 100 )
-v3_1_wide %>%
+big.differences <- v3_1_wide %>%
   filter(abs(diff.population)>acceptable_population_difference/1e6,
          abs(diff.population.perc)>acceptable_population_difference_percentage)
+
+write_delim(
+  x = big.differences,
+  file = here("output", "V3_1", "data", "internal_inconsistencies_longformat.csv"),
+  delim = ","
+)
