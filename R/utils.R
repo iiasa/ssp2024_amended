@@ -2512,6 +2512,136 @@ load_iam_region_mappings <- function() {
 
 ### IAMC data ------------------------------------------------------------------
 
+##### Load data ----------------------------------------------------------------
+
+#' Load an Excel file with specified column types for IAMC format
+#'
+#' `load_excel_iamc` reads data from an Excel file, ensuring that a specified
+#' number of initial columns (typically for IAMC-compliant files) are treated
+#' as character data, while all other columns are treated as numeric.
+#' This function attempts to read the "data" sheet first, and falls back to the
+#' first sheet if "data" is not available.
+#'
+#' @param file_path Character. The path to the Excel file to be loaded.
+#' @param iamc_column_numbers Integer. The number of initial columns to treat
+#'   as character (default is 5, for IAMC-compliant files).
+#' @param ... Additional arguments passed to `readxl::read_excel` for flexibility,
+#'   such as `range` to specify a cell range.
+#'
+#' @return A data frame with the first `iamc_column_numbers` columns as character
+#'   and all remaining columns as numeric.
+#'
+#' @import readxl
+#' @export
+#'
+#' @examples
+#' # Load data from an Excel file, trying "data" sheet first
+#' data <- load_excel_iamc("data.xlsx")
+#'
+#' # Load data with specific column numbers
+#' data <- load_excel_iamc("data.xlsx", iamc_column_numbers = 3)
+
+load_excel_iamc <- function(file_path, iamc_column_numbers = 5, sheet = NULL, ...) {
+
+  if (is.null(sheet)){
+    # Try reading the sheet "data" first
+    data <- tryCatch({
+      readxl::read_excel(file_path, sheet = "data", n_max = 1, ...)
+    }, error = function(e) {
+      NULL # Return NULL silently on failure
+    })
+
+    # Determine the sheet to use
+    sheet_to_use <- if (!is.null(data)) "data" else 1
+  } else {
+    sheet_to_use <- sheet
+  }
+
+
+  # Load only the first row to determine the total number of columns
+  n_cols <- ncol(readxl::read_excel(file_path, sheet = sheet_to_use, n_max = 1, ...))
+
+  # Set column types: initial columns as character, the rest as numeric
+  col_types <- c(rep("text", iamc_column_numbers),
+                 rep("numeric", max(0, n_cols - iamc_column_numbers)))
+
+  # Read the full data with specified column types
+  data <- readxl::read_excel(file_path, sheet = sheet_to_use, col_types = col_types, ...)
+
+  return(data)
+}
+
+
+#' Load a CSV file with specified column types for IAMC format
+#'
+#' `load_csv_iamc` reads data from a CSV file, treating a specified number of
+#' initial columns (typically for IAMC-compliant files) as character data, while
+#' the remaining columns are treated as numeric. The function supports two modes
+#' for reading files: `standard` for using `readr::read_csv`, and `fast` for using
+#' `vroom::vroom` to leverage faster file reading capabilities for larger datasets.
+#'
+#' @param file_path Character. The path to the CSV file to be loaded.
+#' @param iamc_column_numbers Integer. The number of initial columns to treat
+#'   as character (default is 5, for IAMC-compliant files).
+#' @param mode Character. Specifies the file reading mode. Options are:
+#'   - `"standard"`: Uses `readr::read_csv` for reading the file. This is the
+#'     default option and is suitable for most use cases.
+#'   - `"fast"`: Uses `vroom::vroom` for faster file reading, especially
+#'     beneficial for large datasets.
+#' @param ... Additional arguments passed to the file reading function (`readr::read_csv`
+#'   or `vroom::vroom`) for flexibility, such as `col_names` to specify column names.
+#'
+#' @return A data frame with the first `iamc_column_numbers` columns as character
+#'   and all remaining columns as numeric.
+#'
+#' @import readr
+#' @importFrom vroom vroom
+#' @export
+#'
+#' @examples
+#' # Load data from a CSV file, treating first 5 columns as character
+#' data <- load_csv_iamc("data.csv")
+#'
+#' # Load data with 3 character columns in fast mode
+#' data <- load_csv_iamc("data.csv", iamc_column_numbers = 3, mode = "fast")
+
+load_csv_iamc <- function(file_path, iamc_column_numbers = 5, mode="standard", ...) {
+
+  if (
+    mode == "standard"
+  ){
+    # Determine the total number of columns by reading only the header
+    n_cols <- ncol(readr::read_csv(file_path, col_types = readr::cols(), n_max = 1, ...))
+
+    # Set column types: initial columns as character, the rest as numeric
+    col_types <- paste0(
+      strrep("c", iamc_column_numbers),
+      strrep("d", max(0, n_cols - iamc_column_numbers))
+    )
+
+    # Read the full data with specified column types
+    data <- readr::read_csv(file_path, col_types = col_types, ...)
+
+  } else if (
+    mode == "fast"
+  ) {
+    # Determine the total number of columns by reading only the header
+    n_cols <- ncol(vroom::vroom(file_path, col_types = readr::cols(), n_max = 1, ...))
+
+    # Set column types: initial columns as character, the rest as numeric
+    col_types <- paste0(
+      strrep("c", iamc_column_numbers),
+      strrep("d", max(0, n_cols - iamc_column_numbers))
+    )
+
+    # Read the full data with specified column types
+    data <- vroom::vroom(file_path, col_types = col_types, ...)
+  }
+
+
+  return(data)
+}
+
 
 ##### Filter data --------------------------------------------------------------
 
